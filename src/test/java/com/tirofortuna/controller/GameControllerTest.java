@@ -34,7 +34,7 @@ class GameControllerTest {
         when(gameService.findAll()).thenReturn(Collections.emptyList());
 
         // Perform GET request and validate the response
-        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/game/")
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/game")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$").isArray());

@@ -31,7 +31,7 @@ services:
         "spring.datasource.password" : "$MYSQLDB_ROOT_PASSWORD",
         "spring.jpa.show-sql" : "true",
         "spring.jpa.properties.hibernate.format_sql" : "true",
-        "spring.jpa.hibernate.ddl-auto" : "create-drop"
+        "spring.jpa.hibernate.ddl-auto" : "create"
       }'
     volumes:
       - ./docker/m2:/root/.m2
