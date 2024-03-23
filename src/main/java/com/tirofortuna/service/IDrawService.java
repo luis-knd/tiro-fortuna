@@ -10,9 +10,11 @@ public interface IDrawService {
 
     List<Draw> findAll();
 
+    Optional<Draw> findById(Long id);
+
     void save(Draw draw);
 
     void deleteById(Long id);
 
-    Optional<Draw> findDrawByDateInRange(Date minDate, Date maxDate);
+    List<Draw> findDrawByDateInRange(Date minDate, Date maxDate);
 }

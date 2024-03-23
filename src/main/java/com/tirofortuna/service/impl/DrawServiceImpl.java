@@ -24,6 +24,11 @@ public class DrawServiceImpl implements IDrawService {
     }
 
     @Override
+    public Optional<Draw> findById(Long id) {
+        return iDrawDAO.findById(id);
+    }
+
+    @Override
     public void save(Draw draw) {
         iDrawDAO.save(draw);
     }
@@ -34,7 +39,7 @@ public class DrawServiceImpl implements IDrawService {
     }
 
     @Override
-    public Optional<Draw> findDrawByDateInRange(Date minDate, Date maxDate) {
+    public List<Draw> findDrawByDateInRange(Date minDate, Date maxDate) {
         return iDrawDAO.findDrawByDateInRange(minDate, maxDate);
     }
 }

@@ -30,29 +30,29 @@ public class GameController {
 
 
     @Operation(
-            summary = "Retrieve all games",
-            description = "Get all Games object. The response is a list of Games object with id, name and draw list.",
-            tags = { "games", "getAll" })
+        summary = "Retrieve all games",
+        description = "Get all Games object. The response is a list of Games object with id, name and draw list.",
+        tags = {"getAll"})
     @GetMapping("")
     public ResponseEntity<?> findAll() {
         List<GameDTO> gameList = gameService.findAll()
-                .stream()
-                .map(game -> GameDTO.builder()
-                        .id(game.getId())
-                        .name(game.getName())
-                        .drawList(game.getDrawList())
-                        .build()
-                ).toList();
+            .stream()
+            .map(game -> GameDTO.builder()
+                .id(game.getId())
+                .name(game.getName())
+                .drawList(game.getDrawList())
+                .build()
+            ).toList();
         return ResponseEntity.ok(gameList);
     }
 
     @Operation(
-            summary = "Retrieve a game by Id",
-            description = "Get a Game object by specifying its id. The response is Game object with id, name and draw list.",
-            tags = { "game", "get" })
+        summary = "Retrieve a game by Id",
+        description = "Get a Game object by specifying its id. The response is Game object with id, name and draw list.",
+        tags = {"get"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Game found"),
-            @ApiResponse(responseCode = "404", description = "Game not found")
+        @ApiResponse(responseCode = "200", description = "Game found"),
+        @ApiResponse(responseCode = "404", description = "Game not found")
     })
     @GetMapping("/{id}")
     public ResponseEntity<?> findById(@PathVariable Long id) {
@@ -60,22 +60,22 @@ public class GameController {
         if (gameOptional.isPresent()) {
             Game game = gameOptional.get();
             GameDTO gameDTO = GameDTO.builder()
-                    .id(game.getId())
-                    .name(game.getName())
-                    .drawList(game.getDrawList())
-                    .build();
+                .id(game.getId())
+                .name(game.getName())
+                .drawList(game.getDrawList())
+                .build();
             return ResponseEntity.ok(gameDTO);
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Game not found");
     }
 
     @Operation(
-            summary = "Save a game",
-            description = "Create a new Game object. The request body must contain the name of the game. The response is the created Game object with its id, name and draw list.",
-            tags = { "game", "create" })
+        summary = "Save a game",
+        description = "Create a new Game object. The request body must contain the name of the game. The response is the created Game object with its id, name and draw list.",
+        tags = {"create"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "201", description = "Game created"),
-            @ApiResponse(responseCode = "400", description = "Bad request")
+        @ApiResponse(responseCode = "201", description = "Game created"),
+        @ApiResponse(responseCode = "400", description = "Bad request")
     })
     @PostMapping("")
     public ResponseEntity<?> save(@RequestBody GameDTO gameDTO) {
@@ -85,9 +85,9 @@ public class GameController {
 
         try {
             gameService.save(
-                    Game.builder().name(
-                            gameDTO.getName()
-                    ).build()
+                Game.builder().name(
+                    gameDTO.getName()
+                ).build()
             );
             return ResponseEntity.created(new URI("/api/v1/game/")).build();
         } catch (URISyntaxException e) {
@@ -96,13 +96,13 @@ public class GameController {
     }
 
     @Operation(
-            summary = "Update game by ID",
-            description = "Update an existing Game object by its id. The request body must contain the new name of the game. The response is a confirmation message.",
-            tags = { "game", "update" })
+        summary = "Update game by ID",
+        description = "Update an existing Game object by its id. The request body must contain the new name of the game. The response is a confirmation message.",
+        tags = {"update"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Game updated"),
-            @ApiResponse(responseCode = "400", description = "Bad request"),
-            @ApiResponse(responseCode = "404", description = "Game not found")
+        @ApiResponse(responseCode = "200", description = "Game updated"),
+        @ApiResponse(responseCode = "400", description = "Bad request"),
+        @ApiResponse(responseCode = "404", description = "Game not found")
     })
     @PutMapping("/{id}")
     public ResponseEntity<?> updateGameById(@PathVariable Long id, @RequestBody GameDTO gameDTO) {
@@ -114,17 +114,17 @@ public class GameController {
             return ResponseEntity.ok("Game updated");
         }
         return gameDTO.getName().isBlank() ?
-                ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Name is required") :
-                ResponseEntity.status(HttpStatus.NOT_FOUND).body("Game not found");
+            ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Name is required") :
+            ResponseEntity.status(HttpStatus.NOT_FOUND).body("Game not found");
     }
 
     @Operation(
-            summary = "Delete game by ID",
-            description = "Delete an existing Game object by its id. The response is a confirmation message.",
-            tags = { "game", "delete" })
+        summary = "Delete game by ID",
+        description = "Delete an existing Game object by its id. The response is a confirmation message.",
+        tags = {"delete"})
     @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Game deleted successfully"),
-            @ApiResponse(responseCode = "400", description = "Bad request")
+        @ApiResponse(responseCode = "200", description = "Game deleted successfully"),
+        @ApiResponse(responseCode = "400", description = "Bad request")
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteById(@PathVariable Long id) {

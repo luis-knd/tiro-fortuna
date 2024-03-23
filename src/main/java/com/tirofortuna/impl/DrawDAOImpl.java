@@ -24,6 +24,11 @@ public class DrawDAOImpl implements IDrawDAO {
     }
 
     @Override
+    public Optional<Draw> findById(Long id) {
+        return drawRepository.findById(id);
+    }
+
+    @Override
     public void save(Draw draw) {
         drawRepository.save(draw);
     }
@@ -34,7 +39,7 @@ public class DrawDAOImpl implements IDrawDAO {
     }
 
     @Override
-    public Optional<Draw> findDrawByDateInRange(Date minDate, Date maxDate) {
+    public List<Draw> findDrawByDateInRange(Date minDate, Date maxDate) {
         return drawRepository.findDrawByDateBetween(minDate, maxDate);
     }
 }
