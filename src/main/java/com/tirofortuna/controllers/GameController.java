@@ -1,6 +1,7 @@
 package com.tirofortuna.controllers;
 
 import com.tirofortuna.controllers.dto.GameDTO;
+import com.tirofortuna.controllers.dto.mapper.GameMapper;
 import com.tirofortuna.entities.Game;
 import com.tirofortuna.service.IGameService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -37,12 +38,8 @@ public class GameController {
     public ResponseEntity<?> findAll() {
         List<GameDTO> gameList = gameService.findAll()
             .stream()
-            .map(game -> GameDTO.builder()
-                .id(game.getId())
-                .name(game.getName())
-                .drawList(game.getDrawList())
-                .build()
-            ).toList();
+            .map(GameMapper::toGameDTO)
+            .toList();
         return ResponseEntity.ok(gameList);
     }
 
@@ -59,11 +56,7 @@ public class GameController {
         Optional<Game> gameOptional = gameService.findById(id);
         if (gameOptional.isPresent()) {
             Game game = gameOptional.get();
-            GameDTO gameDTO = GameDTO.builder()
-                .id(game.getId())
-                .name(game.getName())
-                .drawList(game.getDrawList())
-                .build();
+            GameDTO gameDTO = GameMapper.toGameDTO(game);
             return ResponseEntity.ok(gameDTO);
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Game not found");
@@ -84,11 +77,7 @@ public class GameController {
         }
 
         try {
-            gameService.save(
-                Game.builder().name(
-                    gameDTO.getName()
-                ).build()
-            );
+            gameService.save(GameMapper.toGameEntity(gameDTO));
             return ResponseEntity.created(new URI("/api/v1/game/")).build();
         } catch (URISyntaxException e) {
             throw new RuntimeException("Error creating URI", e);

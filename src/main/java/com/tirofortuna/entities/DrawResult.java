@@ -17,7 +17,7 @@ public class DrawResult {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long Id;
+    private Long id;
 
     @NotBlank(message = "Draw is required")
     @OneToOne

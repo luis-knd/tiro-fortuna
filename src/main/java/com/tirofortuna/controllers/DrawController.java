@@ -1,6 +1,7 @@
 package com.tirofortuna.controllers;
 
 import com.tirofortuna.controllers.dto.DrawDTO;
+import com.tirofortuna.controllers.dto.mapper.DrawMapper;
 import com.tirofortuna.entities.Draw;
 import com.tirofortuna.service.IDrawService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -39,13 +40,8 @@ public class DrawController {
     public ResponseEntity<?> findAll() {
         List<DrawDTO> drawList = drawService.findAll()
             .stream()
-            .map(draw -> DrawDTO.builder()
-                .id(draw.getId())
-                .date(draw.getDate())
-                .game(draw.getGame())
-                .drawResult(draw.getDrawResult())
-                .build()
-            ).toList();
+            .map(DrawMapper::toDrawDTO)
+            .toList();
         return ResponseEntity.ok(drawList);
     }
 
@@ -61,13 +57,7 @@ public class DrawController {
     public ResponseEntity<?> findById(@PathVariable Long id) {
         Optional<Draw> drawOptional = drawService.findById(id);
         if (drawOptional.isPresent()) {
-            return ResponseEntity.ok(DrawDTO.builder()
-                .id(drawOptional.get().getId())
-                .date(drawOptional.get().getDate())
-                .game(drawOptional.get().getGame())
-                .drawResult(drawOptional.get().getDrawResult())
-                .build()
-            );
+            return ResponseEntity.ok(DrawMapper.toDrawDTO(drawOptional.get()));
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Draw not found");
     }
@@ -84,18 +74,12 @@ public class DrawController {
     })
     @PostMapping("")
     public ResponseEntity<?> save(@RequestBody DrawDTO drawDTO) {
-        if (drawDTO.getDate() == null || drawDTO.getGame() == null || drawDTO.getDrawResult() == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Date, game and draw result is required");
+        if (drawDTO.getDate() == null || drawDTO.getGame() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Date and game are required");
         }
 
         try {
-            drawService.save(
-                Draw.builder()
-                    .date(drawDTO.getDate())
-                    .game(drawDTO.getGame())
-                    .drawResult(drawDTO.getDrawResult())
-                    .build()
-            );
+            drawService.save(DrawMapper.toDrawEntity(drawDTO));
             return ResponseEntity.created(new URI("/api/v1/draw")).build();
         } catch (URISyntaxException e) {
             throw new RuntimeException("Error creating new draw", e);
@@ -117,8 +101,7 @@ public class DrawController {
         Optional<Draw> drawOptional = drawService.findById(id);
         if (drawOptional.isPresent() &&
             drawDTO.getDate() != null &&
-            drawDTO.getGame() != null &&
-            drawDTO.getDrawResult() != null
+            drawDTO.getGame() != null
         ) {
             Draw draw = drawOptional.get();
             draw.setDate(drawDTO.getDate());
@@ -128,7 +111,7 @@ public class DrawController {
             return ResponseEntity.ok("Draw updated");
         }
         return drawOptional.isPresent() ?
-            ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Date, game and draw result are required") :
+            ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Date and game are required") :
             ResponseEntity.status(HttpStatus.NOT_FOUND).body("Draw not found");
     }
 
@@ -172,13 +155,8 @@ public class DrawController {
 
             List<DrawDTO> drawList = drawService.findDrawByDateInRange(parsedMinDate, parsedMaxDate)
                 .stream()
-                .map(draw -> DrawDTO.builder()
-                    .id(draw.getId())
-                    .date(draw.getDate())
-                    .game(draw.getGame())
-                    .drawResult(draw.getDrawResult())
-                    .build()
-                ).toList();
+                .map(DrawMapper::toDrawDTO)
+                .toList();
             return ResponseEntity.ok(drawList);
         } catch (ParseException e) {
             return ResponseEntity.badRequest().body("Invalid date format. Please provide dates in yyyy-MM-dd format.");

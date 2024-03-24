@@ -1,6 +1,7 @@
 package com.tirofortuna.controllers;
 
 import com.tirofortuna.controllers.dto.DrawResultDTO;
+import com.tirofortuna.controllers.dto.mapper.DrawResultMapper;
 import com.tirofortuna.entities.DrawResult;
 import com.tirofortuna.service.IDrawResultService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -35,12 +36,8 @@ public class DrawResultController {
     public ResponseEntity<?> findAll() {
         List<DrawResultDTO> drawResultList = drawResultService.findAll()
             .stream()
-            .map(drawResult -> DrawResultDTO.builder()
-                .id(drawResult.getId())
-                .draw_result(drawResult.getDraw_result())
-                .result(drawResult.getResult())
-                .build()
-            ).toList();
+            .map(DrawResultMapper::toDrawResultDTO)
+            .toList();
         return ResponseEntity.ok(drawResultList);
     }
 
@@ -56,12 +53,7 @@ public class DrawResultController {
     public ResponseEntity<?> findById(@PathVariable Long id) {
         Optional<DrawResult> drawResultOptional = drawResultService.findById(id);
         if (drawResultOptional.isPresent()) {
-            return ResponseEntity.ok(DrawResultDTO.builder()
-                .id(drawResultOptional.get().getId())
-                .draw_result(drawResultOptional.get().getDraw_result())
-                .result(drawResultOptional.get().getResult())
-                .build()
-            );
+            return ResponseEntity.ok(DrawResultMapper.toDrawResultDTO(drawResultOptional.get()));
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Draw Result not found");
     }
@@ -77,15 +69,10 @@ public class DrawResultController {
     @PostMapping("")
     public ResponseEntity<?> save(@RequestBody DrawResultDTO drawResultDTO) {
         if (drawResultDTO.getDraw_result() == null || drawResultDTO.getResult() == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Draw, and result is required");
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Draw, and result are required");
         }
         try {
-            drawResultService.save(
-                DrawResult.builder()
-                    .draw_result(drawResultDTO.getDraw_result())
-                    .result(drawResultDTO.getResult())
-                    .build()
-            );
+            drawResultService.save(DrawResultMapper.toDrawResultEntity(drawResultDTO));
             return ResponseEntity.created(new URI("/api/v1/draw-result")).build();
         } catch (URISyntaxException e) {
             throw new RuntimeException("Error creating new draw result", e);
@@ -130,11 +117,13 @@ public class DrawResultController {
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteById(@PathVariable Long id) {
-        if (id != null) {
+        if (id != null && id > 0) {
             drawResultService.deleteById(id);
             return ResponseEntity.ok("Draw result deleted successfully");
         }
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Id is required");
+        return id == null ?
+            ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Id is required") :
+            ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Id must be greater than 0");
     }
 
 }

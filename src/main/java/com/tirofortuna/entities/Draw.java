@@ -19,7 +19,7 @@ public class Draw {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long Id;
+    private Long id;
 
     @NotBlank(message = "Draw date is required")
     @DateTimeFormat(pattern = "yyyy-MM-dd")
