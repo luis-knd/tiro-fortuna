@@ -5,10 +5,10 @@ import static org.mockito.Mockito.*;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import factories.GameFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -37,9 +37,7 @@ public class GameControllerTest {
     @Test
     public void testFindAll() {
         // Mock data
-        Game game1 = new Game(1L, "Game 1", null);
-        Game game2 = new Game(2L, "Game 2", null);
-        List<Game> games = Arrays.asList(game1, game2);
+        List<Game> games = GameFactory.createFakeGameList(2);
         when(gameServiceMock.findAll()).thenReturn(games);
 
 
@@ -67,8 +65,8 @@ public class GameControllerTest {
     @Test
     public void testFindById() {
         // Mock data
-        Long gameId = 1L;
-        Game game = new Game(gameId, "Game 1", null);
+        Game game = GameFactory.createFakeGame();
+        Long gameId = game.getId();
         when(gameServiceMock.findById(gameId)).thenReturn(Optional.of(game));
 
         // Act
@@ -102,8 +100,7 @@ public class GameControllerTest {
     @Test
     public void testSave() throws URISyntaxException {
         // Create a mock GameDTO
-        GameDTO gameDTO = new GameDTO();
-        gameDTO.setName("New Game");
+        GameDTO gameDTO = GameFactory.createFakeGameDTO();
 
         // Call the save method in the GameController
         ResponseEntity<?> responseEntity = gameController.save(gameDTO);
@@ -131,9 +128,9 @@ public class GameControllerTest {
     @Test
     void testUpdateGameById() {
         // Mock data
-        Long gameId = 1L;
-        Game game = new Game(gameId, "Game 1", null);
-        GameDTO gameDTO = new GameDTO(null, "Game 1 Updated", null);
+        Game game = GameFactory.createFakeGame();
+        Long gameId = game.getId();
+        GameDTO gameDTO = new GameDTO(null, GameFactory.createFakeGameDTO().getName(), null);
         when(gameServiceMock.findById(gameId)).thenReturn(Optional.of(game));
 
         // Act
@@ -151,7 +148,7 @@ public class GameControllerTest {
     void testUpdateGameById_GameNotFound() {
         // Mock data
         Long gameId = 1L;
-        GameDTO gameDTO = new GameDTO(null, "Updated Game", null);
+        GameDTO gameDTO = new GameDTO(null, GameFactory.createFakeGameDTO().getName(), null);
         when(gameServiceMock.findById(gameId)).thenReturn(Optional.empty());
 
         // Act
@@ -166,8 +163,8 @@ public class GameControllerTest {
     @Test
     void testUpdateGameById_InvalidName() {
         // Mock data
-        Long gameId = 1L;
-        Game game = new Game(gameId, "Game 1", null);
+        Game game = GameFactory.createFakeGame();
+        Long gameId = game.getId();
         GameDTO gameDTO = new GameDTO(null, "", null);
 
         when(gameServiceMock.findById(gameId)).thenReturn(Optional.of(game));

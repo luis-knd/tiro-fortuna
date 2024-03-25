@@ -4,6 +4,7 @@ import com.tirofortuna.controllers.dto.DrawDTO;
 import com.tirofortuna.entities.Draw;
 import com.tirofortuna.entities.Game;
 import com.tirofortuna.service.IDrawService;
+import factories.DrawFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -16,8 +17,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -43,17 +42,7 @@ class DrawControllerTest {
     @Test
     void testFindAll() {
         // Mock Data
-        Long gameId = 1L;
-        Game game = new Game(gameId, "Game 1", null);
-        Date currentDate = Date.from(LocalDate.now()
-            .atStartOfDay(ZoneId.systemDefault())
-            .toInstant());
-        Date dateOneMonthBefore = Date.from(LocalDate.now().minusMonths(1)
-            .atStartOfDay(ZoneId.systemDefault())
-            .toInstant());
-        Draw draw1 = new Draw(1L, currentDate, game, null);
-        Draw draw2 = new Draw(2L, dateOneMonthBefore, game, null);
-        List<Draw> draws = Arrays.asList(draw1, draw2);
+        List<Draw> draws = DrawFactory.createFakeDrawList(2);
         when(drawServiceMock.findAll()).thenReturn(draws);
 
         // Act
@@ -82,14 +71,11 @@ class DrawControllerTest {
     @Test
     void testFindById() {
         // Mock Data
-        Long drawId = 1L;
-        Long gameId = 1L;
-        Game game = new Game(gameId, "Game 1", null);
-        Draw draw = new Draw(drawId, new Date(), game, null);
-        when(drawServiceMock.findById(drawId)).thenReturn(Optional.of(draw));
+        Draw draw = DrawFactory.createFakeDraw();
+        when(drawServiceMock.findById(draw.getId())).thenReturn(Optional.of(draw));
 
         // Act
-        ResponseEntity<?> response = drawController.findById(drawId);
+        ResponseEntity<?> response = drawController.findById(draw.getId());
         DrawDTO drawDTO = (DrawDTO) response.getBody();
 
         // Assert
@@ -99,7 +85,7 @@ class DrawControllerTest {
         assertEquals(draw.getDate(), drawDTO.getDate());
         assertEquals(draw.getGame(), drawDTO.getGame());
         assertEquals(draw.getDrawResult(), drawDTO.getDrawResult());
-        verify(drawServiceMock, times(1)).findById(drawId);
+        verify(drawServiceMock, times(1)).findById(draw.getId());
     }
 
     @Test
@@ -121,9 +107,7 @@ class DrawControllerTest {
     @Test
     void testSave() throws URISyntaxException {
         // Mock Data
-        Long gameId = 1L;
-        Game game = new Game(gameId, "Game 1", null);
-        DrawDTO drawDTO = new DrawDTO(null, new Date(), game, null);
+        DrawDTO drawDTO = DrawFactory.createFakeDrawDTO();
 
         // Act
         ResponseEntity<?> response = drawController.save(drawDTO);
@@ -151,15 +135,12 @@ class DrawControllerTest {
     @Test
     void testUpdateDrawById() {
         // Mock Data
-        Long drawId = 1L;
-        Long gameId = 1L;
-        Game game = new Game(gameId, "Game 1", null);
-        Draw draw = new Draw(drawId, new Date(), game, null);
-        DrawDTO drawDTO = new DrawDTO(drawId, new Date(), game, null);
-        when(drawServiceMock.findById(drawId)).thenReturn(Optional.of(draw));
+        Draw draw = DrawFactory.createFakeDraw();
+        DrawDTO drawDTO = new DrawDTO(draw.getId(), new Date(), DrawFactory.createFakeDrawDTO().getGame(), null);
+        when(drawServiceMock.findById(draw.getId())).thenReturn(Optional.of(draw));
 
         // Act
-        ResponseEntity<?> response = drawController.updateDrawById(drawId, drawDTO);
+        ResponseEntity<?> response = drawController.updateDrawById(draw.getId(), drawDTO);
 
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
@@ -175,9 +156,7 @@ class DrawControllerTest {
     void testUpdateDrawById_DrawNotFound() {
         // Mock Data
         Long drawId = 1L;
-        Long gameId = 1L;
-        Game game = new Game(gameId, "Game 1", null);
-        DrawDTO drawDTO = new DrawDTO(null, new Date(), game, null);
+        DrawDTO drawDTO = DrawFactory.createFakeDrawDTO();
         when(drawServiceMock.findById(drawId)).thenReturn(Optional.empty());
 
         // Act
@@ -192,15 +171,12 @@ class DrawControllerTest {
     @Test
     void testUpdateDrawById_InvalidRequest() {
         // Mock Data
-        Long drawId = 1L;
-        Long gameId = 1L;
-        Game game = new Game(gameId, "Game 1", null);
+        Draw draw = DrawFactory.createFakeDraw();
         DrawDTO drawDTO = new DrawDTO(null, null, null, null);
-        Draw draw = new Draw(drawId, new Date(), game, null);
-        when(drawServiceMock.findById(drawId)).thenReturn(Optional.of(draw));
+        when(drawServiceMock.findById(draw.getId())).thenReturn(Optional.of(draw));
 
         // Act
-        ResponseEntity<?> response = drawController.updateDrawById(drawId, drawDTO);
+        ResponseEntity<?> response = drawController.updateDrawById(draw.getId(), drawDTO);
 
         // Assert
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
