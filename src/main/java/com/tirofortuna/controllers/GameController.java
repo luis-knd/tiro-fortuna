@@ -72,7 +72,7 @@ public class GameController {
     })
     @PostMapping("")
     public ResponseEntity<?> save(@RequestBody GameDTO gameDTO) {
-        if (gameDTO.getName().isBlank()) {
+        if (gameDTO.getName() == null || gameDTO.getName().isBlank()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Name is required");
         }
 

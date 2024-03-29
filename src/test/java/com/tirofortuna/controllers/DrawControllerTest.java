@@ -3,6 +3,7 @@ package com.tirofortuna.controllers;
 import com.tirofortuna.controllers.dto.DrawDTO;
 import com.tirofortuna.entities.Draw;
 import com.tirofortuna.entities.Game;
+import com.tirofortuna.repository.DrawRepository;
 import com.tirofortuna.service.IDrawService;
 import factories.DrawFactory;
 import org.junit.jupiter.api.BeforeEach;
@@ -17,10 +18,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -33,6 +31,9 @@ class DrawControllerTest {
 
     @InjectMocks
     private DrawController drawController;
+
+    @Mock
+    private DrawRepository drawRepository;
 
     @BeforeEach
     void setUp() {
@@ -275,5 +276,80 @@ class DrawControllerTest {
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals("Invalid date format. Please provide dates in yyyy-MM-dd format.", response.getBody());
         verify(drawServiceMock, never()).findDrawByDateInRange(any(Date.class), any(Date.class));
+    }
+
+    @Test
+    void testFindOccurrencesByResultAndGame_WithValidGameId_ReturnsOkStatus() {
+        // Mock Data
+        Long gameId = 1L;
+        Map<Integer, Integer> occurrenceMap = new HashMap<>();
+        occurrenceMap.put(8, 2);
+        occurrenceMap.put(11, 2);
+        occurrenceMap.put(12, 2);
+        occurrenceMap.put(16, 1);
+        occurrenceMap.put(44, 3);
+        occurrenceMap.put(2, 1);
+        occurrenceMap.put(17, 1);
+        occurrenceMap.put(23, 1);
+        occurrenceMap.put(36, 1);
+        occurrenceMap.put(24, 1);
+        String[] expectedJson = {
+            "{\"N1\": 8, \"N2\": 11, \"N3\": 12, \"N4\": 16, \"N5\": 44, \"Estrella1\": 9, \"Estrella2\": 12}",
+            "{\"N1\": 11, \"N2\": 8, \"N3\": 12, \"N4\": 44, \"N5\": 2, \"Estrella1\": 1, \"Estrella2\": 3}",
+            "{\"N1\": 44, \"N2\": 17, \"N3\": 23, \"N4\": 23, \"N5\": 24, \"Estrella1\": 4, \"Estrella2\": 5}",
+        };
+        when(drawRepository.findAllDrawByGameId(gameId)).thenReturn(expectedJson);
+        when(drawServiceMock.findOccurrencesByResultAndGame(gameId)).thenReturn(occurrenceMap);
+
+
+        // Act
+        ResponseEntity<?> response = drawController.findOccurrencesByResultAndGame(gameId);
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(occurrenceMap, response.getBody());
+        verify(drawServiceMock, times(1)).findOccurrencesByResultAndGame(gameId);
+    }
+
+    @Test
+    void testFindOccurrencesByResultAndGame_WithNullGameId_ReturnsBadRequestStatus() {
+        // Act
+        ResponseEntity<?> response = drawController.findOccurrencesByResultAndGame(null);
+
+        // Assert
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("Game ID is required", response.getBody());
+        verify(drawServiceMock, never()).findOccurrencesByResultAndGame(anyLong());
+    }
+
+    @Test
+    void testFindOccurrencesByResultAndGame_WithEmptyOccurrenceMap_ReturnsNotFoundStatus() {
+        // Mock Data
+        Long gameId = 1L;
+        Map<Integer, Integer> occurrenceMap = new HashMap<>();
+        when(drawServiceMock.findOccurrencesByResultAndGame(gameId)).thenReturn(occurrenceMap);
+
+        // Act
+        ResponseEntity<?> response = drawController.findOccurrencesByResultAndGame(gameId);
+
+        // Assert
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals("Draw result not found", response.getBody());
+        verify(drawServiceMock, times(1)).findOccurrencesByResultAndGame(gameId);
+    }
+
+    @Test
+    void testFindOccurrencesByResultAndGame_WithException_ReturnsInternalServerErrorStatus() {
+        // Mock Data
+        Long gameId = 1L;
+        when(drawServiceMock.findOccurrencesByResultAndGame(gameId)).thenThrow(new RuntimeException("API error"));
+
+        // Act
+        ResponseEntity<?> response = drawController.findOccurrencesByResultAndGame(gameId);
+
+        // Assert
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertEquals("Error finding occurrences by result and game API error", response.getBody());
+        verify(drawServiceMock, times(1)).findOccurrencesByResultAndGame(gameId);
     }
 }

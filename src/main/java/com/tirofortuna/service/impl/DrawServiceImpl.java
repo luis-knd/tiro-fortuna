@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -41,5 +42,10 @@ public class DrawServiceImpl implements IDrawService {
     @Override
     public List<Draw> findDrawByDateInRange(Date minDate, Date maxDate) {
         return iDrawDAO.findDrawByDateInRange(minDate, maxDate);
+    }
+
+    @Override
+    public Map<Integer, Integer> findOccurrencesByResultAndGame(Long gameId) {
+        return iDrawDAO.findOccurrencesByResultAndGame(gameId);
     }
 }

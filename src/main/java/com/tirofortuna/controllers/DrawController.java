@@ -18,6 +18,7 @@ import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.apache.commons.lang3.time.DateUtils.parseDate;
@@ -160,6 +161,29 @@ public class DrawController {
             return ResponseEntity.ok(drawList);
         } catch (ParseException e) {
             return ResponseEntity.badRequest().body("Invalid date format. Please provide dates in yyyy-MM-dd format.");
+        }
+    }
+
+    @Operation(
+        summary = "Retrieve occurrences by result and game",
+        description = "Get occurrences by result and game.",
+        tags = {"get"})
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Occurrences found"),
+    })
+    @GetMapping("/occurrences/{gameId}")
+    public ResponseEntity<?> findOccurrencesByResultAndGame(@Valid @PathVariable Long gameId) {
+        try {
+            if (gameId == null) {
+                return ResponseEntity.badRequest().body("Game ID is required");
+            }
+            Map<Integer, Integer> occurrenceMap = drawService.findOccurrencesByResultAndGame(gameId);
+            if (occurrenceMap.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Draw result not found");
+            }
+            return ResponseEntity.ok(occurrenceMap);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error finding occurrences by result and game " + e.getMessage());
         }
     }
 }
