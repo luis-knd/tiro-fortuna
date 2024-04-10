@@ -46,7 +46,7 @@ public class DrawDAOImpl implements IDrawDAO {
     }
 
     @Override
-    public Map<Integer, Integer> findOccurrencesByResultAndGame(Long gameId) {
+    public Map<Integer, Integer> findAbsoluteFrequencyByGame(Long gameId) {
         try {
             String[] drawResults = drawRepository.findAllDrawByGameId(gameId);
             if (drawResults == null || drawResults.length == 0) {
@@ -61,7 +61,23 @@ public class DrawDAOImpl implements IDrawDAO {
             }
             return occurrenceMap;
         } catch (Exception e) {
-            throw new RuntimeException("Error finding occurrences by result and game", e);
+            throw new RuntimeException("Error finding absolute frequency by game", e);
+        }
+    }
+
+    @Override
+    public Map<Integer, Double> findRelativeFrequencyByGame(Long gameId) {
+        try {
+            Map<Integer, Integer> absoluteFrequencyMap = findAbsoluteFrequencyByGame(gameId);
+            if (absoluteFrequencyMap == null || absoluteFrequencyMap.isEmpty()) {
+                return Collections.emptyMap();
+            }
+            int totalFrequency = absoluteFrequencyMap.values().stream().mapToInt(Integer::intValue).sum();
+            Map<Integer, Double> relativeFrequencyMap = new HashMap<>();
+            absoluteFrequencyMap.forEach((key, value) -> relativeFrequencyMap.put(key, ((double) value / totalFrequency) * 100));
+            return relativeFrequencyMap;
+        } catch (Exception e) {
+            throw new RuntimeException("Error finding relative frequency by game", e);
         }
     }
 

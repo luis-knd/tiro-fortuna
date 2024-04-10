@@ -45,7 +45,12 @@ public class DrawServiceImpl implements IDrawService {
     }
 
     @Override
-    public Map<Integer, Integer> findOccurrencesByResultAndGame(Long gameId) {
-        return iDrawDAO.findOccurrencesByResultAndGame(gameId);
+    public Map<Integer, Integer> findAbsoluteFrequencyByGame(Long gameId) {
+        return iDrawDAO.findAbsoluteFrequencyByGame(gameId);
+    }
+
+    @Override
+    public Map<Integer, Double> findRelativeFrequencyByGame(Long gameId) {
+        return iDrawDAO.findRelativeFrequencyByGame(gameId);
     }
 }

@@ -19,5 +19,6 @@ public interface IDrawDAO {
 
     List<Draw> findDrawByDateInRange(Date minDate, Date maxDate);
 
-    Map<Integer, Integer> findOccurrencesByResultAndGame(Long gameId);
+    Map<Integer, Integer> findAbsoluteFrequencyByGame(Long gameId);
+    Map<Integer, Double> findRelativeFrequencyByGame(Long gameId);
 }

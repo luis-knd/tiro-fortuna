@@ -165,25 +165,49 @@ public class DrawController {
     }
 
     @Operation(
-        summary = "Retrieve occurrences by result and game",
-        description = "Get occurrences by result and game.",
+        summary = "Retrieve frequency of occurrences by result in a game.",
+        description = "Get absolute frequency of occurrences by result in a game.",
         tags = {"get"})
     @ApiResponses(value = {
         @ApiResponse(responseCode = "200", description = "Occurrences found"),
+
     })
-    @GetMapping("/occurrences/{gameId}")
-    public ResponseEntity<?> findOccurrencesByResultAndGame(@Valid @PathVariable Long gameId) {
+    @GetMapping("/absolute-frequency/{gameId}")
+    public ResponseEntity<?> findAbsoluteFrequencyByGame(@Valid @PathVariable Long gameId) {
         try {
             if (gameId == null) {
                 return ResponseEntity.badRequest().body("Game ID is required");
             }
-            Map<Integer, Integer> occurrenceMap = drawService.findOccurrencesByResultAndGame(gameId);
+            Map<Integer, Integer> occurrenceMap = drawService.findAbsoluteFrequencyByGame(gameId);
             if (occurrenceMap.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Draw result not found");
             }
             return ResponseEntity.ok(occurrenceMap);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error finding occurrences by result and game " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error finding absolute frequency by game " + e.getMessage());
+        }
+    }
+
+    @Operation(
+        summary = "Retrieve relative frequency of occurrences by result in a game.",
+        description = "Get relative frequency of occurrences by result in a game.",
+        tags = {"get"})
+    @ApiResponses(value = {
+        @ApiResponse(responseCode = "200", description = "Occurrences found"),
+    })
+    @GetMapping("/relative-frequency/{gameId}")
+    public ResponseEntity<?> findRelativeFrequencyByGame(@Valid @PathVariable Long gameId) {
+        try {
+            if (gameId == null) {
+                return ResponseEntity.badRequest().body("Game ID is required");
+            }
+            Map<Integer, Double> occurrenceMap = drawService.findRelativeFrequencyByGame(gameId);
+            if (occurrenceMap.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Draw result not found");
+            }
+            return ResponseEntity.ok(occurrenceMap);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error finding relative frequency by game " + e.getMessage());
         }
     }
 }

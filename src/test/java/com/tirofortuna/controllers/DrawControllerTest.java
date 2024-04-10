@@ -279,7 +279,7 @@ class DrawControllerTest {
     }
 
     @Test
-    void testFindOccurrencesByResultAndGame_WithValidGameId_ReturnsOkStatus() {
+    void testFindAbsoluteFrequencyByGame_WithValidGameId_ReturnsOkStatus() {
         // Mock Data
         Long gameId = 1L;
         Map<Integer, Integer> occurrenceMap = new HashMap<>();
@@ -299,57 +299,120 @@ class DrawControllerTest {
             "{\"N1\": 44, \"N2\": 17, \"N3\": 23, \"N4\": 23, \"N5\": 24, \"Estrella1\": 4, \"Estrella2\": 5}",
         };
         when(drawRepository.findAllDrawByGameId(gameId)).thenReturn(expectedJson);
-        when(drawServiceMock.findOccurrencesByResultAndGame(gameId)).thenReturn(occurrenceMap);
+        when(drawServiceMock.findAbsoluteFrequencyByGame(gameId)).thenReturn(occurrenceMap);
 
 
         // Act
-        ResponseEntity<?> response = drawController.findOccurrencesByResultAndGame(gameId);
+        ResponseEntity<?> response = drawController.findAbsoluteFrequencyByGame(gameId);
 
         // Assert
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(occurrenceMap, response.getBody());
-        verify(drawServiceMock, times(1)).findOccurrencesByResultAndGame(gameId);
+        verify(drawServiceMock, times(1)).findAbsoluteFrequencyByGame(gameId);
     }
 
     @Test
-    void testFindOccurrencesByResultAndGame_WithNullGameId_ReturnsBadRequestStatus() {
+    void testFindAbsoluteFrequencyByGame_WithNullGameId_ReturnsBadRequestStatus() {
         // Act
-        ResponseEntity<?> response = drawController.findOccurrencesByResultAndGame(null);
+        ResponseEntity<?> response = drawController.findAbsoluteFrequencyByGame(null);
 
         // Assert
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertEquals("Game ID is required", response.getBody());
-        verify(drawServiceMock, never()).findOccurrencesByResultAndGame(anyLong());
+        verify(drawServiceMock, never()).findAbsoluteFrequencyByGame(anyLong());
     }
 
     @Test
-    void testFindOccurrencesByResultAndGame_WithEmptyOccurrenceMap_ReturnsNotFoundStatus() {
+    void testFindAbsoluteFrequencyByGame_WithEmptyOccurrenceMap_ReturnsNotFoundStatus() {
         // Mock Data
         Long gameId = 1L;
         Map<Integer, Integer> occurrenceMap = new HashMap<>();
-        when(drawServiceMock.findOccurrencesByResultAndGame(gameId)).thenReturn(occurrenceMap);
+        when(drawServiceMock.findAbsoluteFrequencyByGame(gameId)).thenReturn(occurrenceMap);
 
         // Act
-        ResponseEntity<?> response = drawController.findOccurrencesByResultAndGame(gameId);
+        ResponseEntity<?> response = drawController.findAbsoluteFrequencyByGame(gameId);
 
         // Assert
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
         assertEquals("Draw result not found", response.getBody());
-        verify(drawServiceMock, times(1)).findOccurrencesByResultAndGame(gameId);
+        verify(drawServiceMock, times(1)).findAbsoluteFrequencyByGame(gameId);
     }
 
     @Test
-    void testFindOccurrencesByResultAndGame_WithException_ReturnsInternalServerErrorStatus() {
+    void testFindAbsoluteFrequencyByGame_WithException_ReturnsInternalServerErrorStatus() {
         // Mock Data
         Long gameId = 1L;
-        when(drawServiceMock.findOccurrencesByResultAndGame(gameId)).thenThrow(new RuntimeException("API error"));
+        when(drawServiceMock.findAbsoluteFrequencyByGame(gameId)).thenThrow(new RuntimeException("API error"));
 
         // Act
-        ResponseEntity<?> response = drawController.findOccurrencesByResultAndGame(gameId);
+        ResponseEntity<?> response = drawController.findAbsoluteFrequencyByGame(gameId);
 
         // Assert
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
-        assertEquals("Error finding occurrences by result and game API error", response.getBody());
-        verify(drawServiceMock, times(1)).findOccurrencesByResultAndGame(gameId);
+        assertEquals("Error finding absolute frequency by game API error", response.getBody());
+        verify(drawServiceMock, times(1)).findAbsoluteFrequencyByGame(gameId);
+    }
+
+    @Test
+    void testFindRelativeFrequencyByGame_WithAbsoluteFrequency() {
+        // Mock Data
+        Long gameId = 1L;
+        Map<Integer, Double> occurrenceMap = new HashMap<>();
+        occurrenceMap.put(1, 33.0);
+        occurrenceMap.put(2, 50.0);
+        occurrenceMap.put(3, 16.0);
+        when(drawServiceMock.findRelativeFrequencyByGame(gameId)).thenReturn(occurrenceMap);
+
+        // Act
+        ResponseEntity<?> response = drawController.findRelativeFrequencyByGame(gameId);
+
+        // Assert
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(occurrenceMap, response.getBody());
+        verify(drawServiceMock, times(1)).findRelativeFrequencyByGame(gameId);
+    }
+
+    @Test
+    void testFindRelativeFrequencyByGame_WithNullGameId_ReturnsBadRequestStatus() {
+        // Act
+        ResponseEntity<?> response = drawController.findRelativeFrequencyByGame(null);
+
+        // Assert
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("Game ID is required", response.getBody());
+        verify(drawServiceMock, never()).findRelativeFrequencyByGame(anyLong());
+    }
+
+    @Test
+    void testFindRelativeFrequencyByGame_WithEmptyOccurrenceMap_ReturnsNotFoundStatus() {
+        // Mock Data
+        Long gameId = 1L;
+        Map<Integer, Double> occurrenceMap = new HashMap<>();
+        when(drawServiceMock.findRelativeFrequencyByGame(gameId)).thenReturn(occurrenceMap);
+
+        // Act
+        ResponseEntity<?> response = drawController.findRelativeFrequencyByGame(gameId);
+
+        // Assert
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        assertEquals("Draw result not found", response.getBody());
+        verify(drawServiceMock, times(1)).findRelativeFrequencyByGame(gameId);
+    }
+
+
+
+    @Test
+    void testFindRelativeFrequencyByGame_WithException_ReturnsInternalServerErrorStatus() {
+        // Mock Data
+        Long gameId = 1L;
+        when(drawServiceMock.findRelativeFrequencyByGame(gameId)).thenThrow(new RuntimeException("API error"));
+
+        // Act
+        ResponseEntity<?> response = drawController.findRelativeFrequencyByGame(gameId);
+
+        // Assert
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertEquals("Error finding relative frequency by game API error", response.getBody());
+        verify(drawServiceMock, times(1)).findRelativeFrequencyByGame(gameId);
     }
 }
